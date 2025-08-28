@@ -1,103 +1,241 @@
-import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState, useEffect } from 'react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { ApiClient } from '@/lib/api';
+import { formatCurrency, formatNumber } from '@/lib/utils';
+import { DashboardMetrics } from '@/lib/types';
+import { TrendingUp, ShoppingCart, Package, DollarSign, Upload } from 'lucide-react';
+import { RevenueChart } from '@/components/dashboard/RevenueChart';
+import { UploadPanel } from '@/components/dashboard/UploadPanel';
+import { DateFilters } from '@/components/dashboard/DateFilters';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function DashboardPage() {
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  useEffect(() => {
+    loadMetrics();
+  }, []);
+
+  const loadMetrics = async (dateFrom?: string, dateTo?: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await ApiClient.getMetrics(dateFrom, dateTo);
+      
+      if (response.success) {
+        setMetrics(response.data);
+      } else {
+        setError('Failed to load dashboard metrics');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load dashboard metrics');
+    } finally {
+      setLoading(false);
+      setInitialLoad(false);
+    }
+  };
+
+  // Only show full loading screen on initial load
+  if (loading && initialLoad) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader className="pb-2">
+                  <div className="h-4 bg-muted animate-pulse rounded" />
+                </CardHeader>
+                <CardContent>
+                  <div className="h-8 bg-muted animate-pulse rounded mb-2" />
+                  <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <div className="space-y-4">
+            <p className="text-red-600">{error}</p>
+            <Button onClick={() => loadMetrics()}>Retry</Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <div className="space-y-4">
+            <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
+            <div>
+              <h3 className="text-lg font-semibold">No Data Available</h3>
+              <p className="text-muted-foreground">Upload some sales data to get started</p>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">
+              Overview of your sales performance
+            </p>
+          </div>
+          <Button onClick={() => loadMetrics()} variant="secondary" size="sm">
+            Refresh Data
+          </Button>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(metrics.kpis.total_revenue)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                From {metrics.kpis.total_orders} orders
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatNumber(metrics.kpis.total_orders)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {formatNumber(metrics.kpis.total_units)} units sold
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Units Sold</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatNumber(metrics.kpis.total_units)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Across all products
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Revenue Chart */}
+        <RevenueChart data={metrics.daily_revenue} loading={loading} />
+
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Left Column - Filters and Upload */}
+          <div className="space-y-6">
+            <DateFilters 
+              onFilterChange={loadMetrics}
+              loading={loading}
+            />
+            <UploadPanel onUploadSuccess={() => loadMetrics()} />
+          </div>
+
+          {/* Right Column - Data Tables */}
+          <div className="xl:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Daily Performance</CardTitle>
+                <CardDescription>
+                  Last few days of sales activity
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {metrics.daily_revenue.slice(-5).map((day) => (
+                    <div key={day.date} className="flex items-center justify-between">
+                      <div className="text-sm font-medium">{day.date}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatCurrency(day.revenue)} • {day.orders} orders
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Products</CardTitle>
+                <CardDescription>
+                  Best performing products by revenue
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {metrics.top_products.slice(0, 5).map((product, index) => (
+                    <div key={product.name} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          #{index + 1}
+                        </span>
+                        <div>
+                          <div className="text-sm font-medium">{product.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {product.category}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          {formatCurrency(product.total_sales)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {product.units_sold} units
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }
