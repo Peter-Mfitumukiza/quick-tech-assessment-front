@@ -72,9 +72,6 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Sales Pulse</h1>
-          <p className="text-muted-foreground mt-2">
-            Sign in to access your dashboard
-          </p>
         </div>
 
         <Card>
@@ -121,14 +118,6 @@ export default function LoginPage() {
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-            
-            <div className="mt-6 p-3 bg-gray-50 rounded-md">
-              <p className="text-xs text-gray-600 text-center">
-                <strong>Demo Credentials:</strong><br />
-                Username: admin<br />
-                Password: admin123
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
